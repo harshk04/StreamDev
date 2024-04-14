@@ -1,0 +1,53 @@
+import cv2
+import numpy as np
+import os
+
+# Define the input and output directories
+input_dir = "output"
+output_dir = "output"
+
+# Create output directory if it doesn't exist
+if not os.path.exists(output_dir):
+    os.makedirs(output_dir)
+
+# Function to crop images
+def crop_images(input_path):
+    # Load the input image
+    image = cv2.imread(input_path)
+
+    # Convert the image to HSV color space
+    hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+
+    # Define the lower and upper bounds for the purple color
+    lower_purple = np.array([125, 50, 50])
+    upper_purple = np.array([160, 255, 255])
+
+    # Threshold the HSV image to get only purple colors
+    mask = cv2.inRange(hsv, lower_purple, upper_purple)
+
+    # Find contours in the mask
+    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    # Get the largest contour (assuming it corresponds to the purple rectangle)
+    largest_contour = max(contours, key=cv2.contourArea)
+
+    # Get the bounding box of the largest contour
+    x, y, w, h = cv2.boundingRect(largest_contour)
+
+    # Crop the region inside the bounding box
+    cropped_image = image[y:y+h, x:x+w]
+
+    # Get the filename from the input path
+    filename = os.path.basename(input_path)
+
+    # Save the cropped image to the output directory
+    output_path = os.path.join(output_dir, filename)
+    cv2.imwrite(output_path, cropped_image)
+
+    print(f"Cropped image saved: {output_path}")
+
+# Process images in the input directory
+for filename in os.listdir(input_dir):
+    if filename.endswith(".jpg") or filename.endswith(".png"):
+        input_path = os.path.join(input_dir, filename)
+        crop_images(input_path)
