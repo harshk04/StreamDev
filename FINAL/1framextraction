@@ -1,0 +1,37 @@
+import cv2
+import sys
+import os
+
+VIDEO_URL = "https://cdn.videosdk.live/meetings-hls/384399d2-6cef-4705-bef5-5f923f6b570b/index.m3u8"
+OUTPUT_FOLDER = "frames"
+SAVE_INTERVAL_SECONDS = 2
+
+# Create output folder if it doesn't exist
+os.makedirs(OUTPUT_FOLDER, exist_ok=True)
+
+cap = cv2.VideoCapture(VIDEO_URL)
+if (cap.isOpened() == False):
+    print('!!! Unable to open URL')
+    sys.exit(-1)
+
+# retrieve FPS
+fps = cap.get(cv2.CAP_PROP_FPS)
+
+frame_count = 0
+while(True):
+    # read one frame
+    ret, frame = cap.read()
+
+    # Save frame to folder at intervals
+    if frame_count % (SAVE_INTERVAL_SECONDS * fps) == 0:
+        frame_filename = os.path.join(OUTPUT_FOLDER, f"frame_{frame_count}.jpg")
+        cv2.imwrite(frame_filename, frame)
+        print(f"Saved frame {frame_count} to {frame_filename}")
+
+    frame_count += 1
+
+    # Check if end of the video stream
+    if not ret:
+        break
+
+cap.release()
