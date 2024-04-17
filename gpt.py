@@ -1,7 +1,7 @@
 import openai
 
 # Set up your OpenAI API key
-openai.api_key = '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'
+openai.api_key = ''
 
 def generate_text(prompt, max_tokens=50, temperature=0.7):
     response = openai.ChatCompletion.create(
